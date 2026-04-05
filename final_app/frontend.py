@@ -62,27 +62,28 @@ def images_zip(images_dir: Path) -> Optional[bytes]:
 
 def try_stream(graph_app, inputs: Dict[str, Any]) -> Iterator[Tuple[str, Any]]:
     """
-    Stream graph progress if available; else invoke.
-    Yields ("updates"/"values"/"final", payload).
+    Stream graph progress and yield the final state — running the graph ONCE.
+
+    Uses stream_mode="values" which emits the full state after every node.
+    The last emitted value is the complete final state, so no separate
+    invoke() call is needed (calling invoke after stream was the root cause
+    of the graph running twice and saving two output files).
+
+    Yields ("values", step) for each intermediate state, then ("final", last_step).
+    Falls back to a plain invoke() if streaming is not supported.
     """
     try:
-        for step in graph_app.stream(inputs, stream_mode="updates"):
-            yield ("updates", step)
-        out = graph_app.invoke(inputs)
-        yield ("final", out)
-        return
-    except Exception:
-        pass
-
-    try:
+        last = None
         for step in graph_app.stream(inputs, stream_mode="values"):
             yield ("values", step)
-        out = graph_app.invoke(inputs)
-        yield ("final", out)
+            last = step  # keep overwriting — final iteration holds the complete state
+        if last is not None:
+            yield ("final", last)
         return
     except Exception:
         pass
 
+    # Fallback: no streaming support — run graph once via invoke
     out = graph_app.invoke(inputs)
     yield ("final", out)
 
