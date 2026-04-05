@@ -1,0 +1,46 @@
+# Environment — never commit API keys
+.env
+*.env
+.env.*
+
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*.pyo
+.Python
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Generated outputs (blogs and images produced at runtime)
+outputs/
+images/
+*.md
+!README.md
+
+# Distribution / packaging
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# macOS metadata
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Streamlit
+.streamlit/
+
+# Claude desktop app data
+.claude
